@@ -7,9 +7,9 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     
-    <!-- Librería Pannellum para visor 360° -->
+    <!-- Pannellum 360° -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
     <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
 
@@ -38,24 +38,22 @@
                 <button class="tab" id="tab1" role="tab" aria-selected="false" onclick="switchTab(1)">PANORÁMICA 360°</button>
             </div>
             
-            <!-- Vista 1: Slider Antes/Después -->
             <div class="view on" id="view0">
                 <div class="stage">
                     <div class="layer" style="background-image:url('termas romanas.png')"></div>
                     <div class="layer" id="after" style="background-image:url('termas actual.jpg')"></div>
-                    <span class="tag" style="left:10px">ORIGINAL</span>
-                    <span class="tag" style="right:10px; background:var(--mint); border-color:var(--mint)">ACTUALIDAD</span>
+                    <span class="tag" style="left:8px">ORIGINAL</span>
+                    <span class="tag" style="right:8px; background:var(--mint); border-color:var(--mint)">ACTUALIDAD</span>
                     <div class="knob" id="knob"><b>◀ ▶</b></div>
                     <input id="rng" type="range" min="0" max="100" value="50" aria-label="Comparar antes y ahora">
                 </div>
                 <p class="hint">Deslice el control para alternar entre el estado arqueológico original y el actual.</p>
             </div>
 
-            <!-- Vista 2: Visor 360° -->
             <div class="view" id="view1">
                 <div class="stage">
                     <div id="panorama"></div>
-                    <span class="tag" style="left:10px; z-index: 10;">PERSPECTIVA 360°</span>
+                    <span class="tag" style="left:8px; z-index: 10;">PERSPECTIVA 360°</span>
                 </div>
                 <p class="hint">Arrastre con el dedo en cualquier dirección para rotar la panorámica 360°.</p>
             </div>
