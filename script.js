@@ -5,7 +5,7 @@ function initPannellum() {
   if (!viewer360) {
     viewer360 = pannellum.viewer('panorama', {
       type: 'equirectangular',
-      panorama: 'termas actual.jpg', // Sustituye con el nombre/ruta de tu imagen panorámica 360°
+      panorama: 'termas.png', // Sustituye con el nombre/ruta de tu imagen panorámica 360°
       autoLoad: true,
       autoRotate: -2,
       compass: false,
