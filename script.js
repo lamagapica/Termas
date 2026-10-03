@@ -1,194 +1,286 @@
-const KEY = "termas";
-const ORDER = ["almazara", "termas", "basilica"];
-const ST = "vareia_pistas";
-
-const $ = s => document.querySelector(s);
-
-const load = () => {
-    try {
-        return JSON.parse(localStorage.getItem(ST)) || {};
-    } catch (e) {
-        return {};
-    }
-};
-
-const save = (k, v) => {
-    try {
-        const d = load();
-        d[k] = v;
-        localStorage.setItem(ST, JSON.stringify(d));
-    } catch (e) {}
-};
-
-const done = () => Object.keys(load()).length;
-
-/* Progreso */
-function paint() {
-    const n = done();
-    $("#trophies").textContent = "REGISTROS " + n + "/3";
-    $("#fill").style.width = (KEY === "campamento" ? 100 : (n / 3 * 100)) + "%";
-}
-paint();
-
-/* Sonido */
-let ac;
-function beep(f, d = .12, t = "square") {
-    try {
-        ac = ac || new AudioContext();
-        const o = ac.createOscillator(), g = ac.createGain();
-        o.type = t;
-        o.frequency.value = f;
-        g.gain.value = .08;
-        o.connect(g);
-        g.connect(ac.destination);
-        o.start();
-        o.stop(ac.currentTime + d);
-    } catch (e) {}
+:root {
+--mint: #3e6b52;
+--gold: #c5a059;
+--dark: #1a1110;
+--card-bg: rgba(255, 255, 255, 0.92);
 }
 
-const fanfare = () => [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, .18), i * 120));
-
-/* Confeti */
-function confetti(n = 90) {
-    const c = ["#c5a059", "#9e472a", "#3e6b52", "#e5d3b3", "#fff"];
-    for (let i = 0; i < n; i++) {
-        const e = document.createElement("i");
-        e.className = "confetti";
-        e.style.left = Math.random() * 100 + "vw";
-        e.style.background = c[i % 5];
-        e.style.animationDuration = (1.8 + Math.random() * 2) + "s";
-        e.style.animationDelay = Math.random() * .6 + "s";
-        document.body.appendChild(e);
-        setTimeout(() => e.remove(), 4500);
-    }
+{
+box-sizing: border-box;
+margin: 0;
+padding: 0;
 }
 
-/* Pestañas */
-const tabs = document.querySelectorAll(".tab");
-tabs.forEach((b, i) => b.onclick = () => {
-    $(".tabs").dataset.t = i;
-    tabs.forEach((x, j) => x.setAttribute("aria-selected", i === j));
-    document.querySelectorAll(".view").forEach((v, j) => v.classList.toggle("on", i === j));
-    beep(i ? 660 : 440, .08);
-});
+body {
+font-family: 'Lora', serif;
+background: #110c0b;
+color: #2c2523;
+padding: 1rem;
+display: flex;
+justify-content: center;
+}
 
-/* Slider comparativo */
-$("#rng").oninput = e => {
-    const v = e.target.value;
-    $("#after").style.clipPath = `inset(0 0 0 ${v}%)`;
-    $(".knob").style.left = v + "%";
-};
+main {
+max-width: 640px;
+width: 100%;
+display: flex;
+flex-direction: column;
+gap: 1rem;
+}
 
-/* Visor 360 */
-let currentX = 0, drag = false, lx = 0;
-const pano = $("#pano");
+header {
+background: var(--card-bg);
+padding: 1.25rem;
+border-radius: 12px;
+border: 1px solid var(--gold);
+}
 
-pano.onpointerdown = e => {
-    drag = true;
-    lx = e.clientX;
-    pano.setPointerCapture(e.pointerId);
-};
+.top {
+display: flex;
+justify-content: space-between;
+margin-bottom: 0.5rem;
+}
 
-pano.onpointermove = e => {
-    if (drag) {
-        const dx = e.clientX - lx;
-        currentX += dx * 1.5;
-        lx = e.clientX;
-        pano.style.backgroundPositionX = currentX + "px";
-    }
-};
+.chip {
+font-family: 'Cinzel', serif;
+font-size: 0.75rem;
+font-weight: 700;
+background: #e5d3b3;
+padding: 0.25rem 0.5rem;
+border-radius: 4px;
+}
 
-pano.onpointerup = pano.onpointercancel = () => drag = false;
+h1 {
+font-family: 'Cinzel', serif;
+font-size: 1.8rem;
+margin-bottom: 1rem;
+color: var(--dark);
+}
 
-pano.onkeydown = e => {
-    if (e.key === "ArrowLeft") {
-        currentX += 60;
-        pano.style.backgroundPositionX = currentX + "px";
-    }
-    if (e.key === "ArrowRight") {
-        currentX -= 60;
-        pano.style.backgroundPositionX = currentX + "px";
-    }
-};
+.path {
+display: flex;
+align-items: center;
+justify-content: space-between;
+position: relative;
+}
 
-/* Estaciones 1-3 */
-if (KEY !== "campamento") {
-    const A = 3;
-    const ok = () => {
-        $(".win").classList.add("on");
-        $("#form").style.display = "none";
-        confetti();
-        fanfare();
-        $(".win").scrollIntoView({ behavior: "smooth" });
-    };
+.node {
+width: 28px;
+height: 28px;
+border-radius: 50%;
+background: #ccc;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 0.8rem;
+font-weight: bold;
+z-index: 2;
+}
 
-    if (load()[KEY] !== undefined) {
-        ok();
-        confetti(0);
-    }
+.node.on, .node.now {
+background: var(--gold);
+color: #fff;
+}
 
-    const check = () => {
-        const v = $("#ans").value.trim();
-        if (+v === A && v !== "") {
-            save(KEY, A);
-            paint();
-            ok();
-        } else {
-            $("#form").classList.remove("shake");
-            void $("#form").offsetWidth;
-            $("#form").classList.add("shake");
-            $("#msg").textContent = "Respuesta no válida. Consulte nuevamente el texto histórico.";
-            beep(150, .3, "sawtooth");
-        }
-    };
+.bar {
+position: absolute;
+top: 50%;
+left: 0;
+right: 0;
+height: 4px;
+background: #ddd;
+transform: translateY(-50%);
+z-index: 1;
+}
 
-    $("#go").onclick = check;
-    $("#ans").onkeydown = e => {
-        if (e.key === "Enter") check();
-    };
-} else {
-    /* Candado */
-    const ins = [...document.querySelectorAll(".lock input")], CODE = "2354";
-    const saved = load();
+#fill {
+display: block;
+height: 100%;
+background: var(--gold);
+transition: width 0.3s ease;
+}
 
-    ORDER.forEach((k, i) => {
-        if (saved[k] !== undefined) setTimeout(() => {
-            ins[i].value = saved[k];
-            ins[i].classList.add("f");
-            beep(400 + i * 120, .08);
-        }, 500 + i * 450);
-    });
+.card {
+background: var(--card-bg);
+padding: 1.25rem;
+border-radius: 12px;
+border: 1px solid #d4c5b3;
+}
 
-    ins.forEach((el, i) => {
-        el.oninput = () => {
-            el.value = el.value.replace(/\D/g, "").slice(-1);
-            if (el.value && ins[i + 1]) ins[i + 1].focus();
-        };
-        el.onkeydown = e => {
-            if (e.key === "Backspace" && !el.value && ins[i - 1]) ins[i - 1].focus();
-            if (e.key === "Enter") open();
-        };
-    });
+.tabs {
+display: flex;
+gap: 0.5rem;
+margin-bottom: 1rem;
+}
 
-    function open() {
-        const c = ins.map(i => i.value).join("");
-        if (c === CODE) {
-            $("#lockbox").style.display = "none";
-            $(".win").classList.add("on");
-            $("#chest").textContent = "🏛️";
-            setTimeout(() => $("#chest").textContent = "📜", 600);
-            confetti(180);
-            fanfare();
-            setInterval(() => confetti(40), 1800);
-            $(".win").scrollIntoView({ behavior: "smooth" });
-        } else {
-            $("#lockbox").classList.remove("shake");
-            void $("#lockbox").offsetWidth;
-            $("#lockbox").classList.add("shake");
-            $("#msg").textContent = c.length < 4 ? "Ingrese la totalidad de los dígitos requeridos." : "Combinación incorrecta. Verifique los registros obtenidos.";
-            beep(150, .3, "sawtooth");
-        }
-    }
+.tab {
+flex: 1;
+padding: 0.6rem;
+font-family: 'Cinzel', serif;
+font-size: 0.75rem;
+font-weight: 700;
+border: 1px solid var(--gold);
+background: transparent;
+cursor: pointer;
+border-radius: 6px;
+}
 
-    $("#go").onclick = open;
+.tab[aria-selected="true"] {
+background: var(--gold);
+color: #fff;
+}
+
+.view {
+display: none;
+}
+
+.view.on {
+display: block;
+}
+
+/* Ajustes del Visor y Slider */
+.stage {
+position: relative;
+width: 100%;
+height: 380px;
+background: #000;
+border-radius: 8px;
+overflow: hidden;
+}
+
+.layer {
+position: absolute;
+inset: 0;
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+}
+
+#after {
+clip-path: inset(0 0 0 50%);
+}
+
+.tag {
+position: absolute;
+top: 10px;
+background: var(--dark);
+color: #fff;
+font-size: 0.65rem;
+padding: 0.2rem 0.5rem;
+border-radius: 4px;
+border: 1px solid var(--gold);
+}
+
+.knob {
+position: absolute;
+top: 0;
+bottom: 0;
+left: 50%;
+width: 2px;
+background: #fff;
+transform: translateX(-50%);
+pointer-events: none;
+z-index: 5;
+}
+
+.knob b {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+background: #fff;
+color: #000;
+padding: 4px 8px;
+border-radius: 12px;
+font-size: 0.7rem;
+}
+
+#rng {
+position: absolute;
+inset: 0;
+width: 100%;
+height: 100%;
+opacity: 0;
+cursor: ew-resize;
+z-index: 6;
+}
+
+.hint {
+font-size: 0.85rem;
+margin-top: 0.75rem;
+color: #666;
+text-align: center;
+}
+
+.mission h2 {
+font-family: 'Cinzel', serif;
+font-size: 1.1rem;
+margin-bottom: 0.5rem;
+}
+
+.q {
+font-weight: 600;
+margin: 1rem 0 0.5rem;
+}
+
+.ans {
+display: flex;
+gap: 0.5rem;
+}
+
+.big {
+width: 60px;
+text-align: center;
+font-size: 1.2rem;
+padding: 0.4rem;
+border: 1px solid #ccc;
+border-radius: 6px;
+}
+
+.btn {
+flex: 1;
+background: var(--mint);
+color: #fff;
+border: none;
+border-radius: 6px;
+font-family: 'Cinzel', serif;
+font-weight: bold;
+cursor: pointer;
+}
+
+.msg {
+color: #a00;
+font-size: 0.85rem;
+margin-top: 0.5rem;
+}
+
+.win {
+display: none;
+text-align: center;
+}
+
+.win.on {
+display: block;
+}
+
+.key {
+font-size: 3rem;
+font-family: 'Cinzel', serif;
+color: var(--gold);
+margin: 0.5rem 0;
+}
+
+.shake {
+animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+0%, 100% { transform: translateX(0); }
+20%, 60% { transform: translateX(-6px); }
+40%, 80% { transform: translateX(6px); }
+}
+
+/* Ajuste visual para Pannellum */
+.pnm-container {
+border-radius: 8px;
 }
