@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2. Las Termas - El Secreto de Varia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: { colors: { cafe: '#382417', caramelo: '#6D3C1C', miel: '#C57938', vainilla: '#E7C196', 'cafe-dark': '#26160d' } } } }
+    </script>
+    <style>
+        body { background-color: #26160d; color: #382417; font-family: 'Inter', sans-serif; min-height: 100vh; }
+        .parchment-sheet { background-color: #E7C196; border-top: 4px solid #C57938; border-bottom: 4px solid #6D3C1C; }
+        .roman-border-box { border: 2px solid #C57938; outline: 1px solid #6D3C1C; outline-offset: -5px; }
+        .slider-img-after { position: absolute; top: 0; left: 0; height: 100%; width: 50%; overflow: hidden; border-right: 3px solid #C57938; }
+    </style>
+</head>
+<body class="flex flex-col justify-between min-h-screen">
+
+    <header class="bg-cafe-dark border-b-2 border-miel px-4 py-4 text-vainilla">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="font-cinzel text-lg font-bold">2. Las Termas Romanas</h1>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-5xl w-full mx-auto my-6 px-4">
+        <div class="parchment-sheet roman-border-box p-6 md:p-10 space-y-6 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-caramelo/30 pb-3">
+                <span class="font-cinzel text-xs font-bold uppercase text-caramelo">Estación II de IV</span>
+                <span class="font-roman text-xs bg-miel/20 px-3 py-1 border border-miel">Punto: La Carnicería</span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 space-y-4">
+                    <div class="relative border-2 border-caramelo h-64 bg-cafe/20 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover">
+                        <div id="slider-overlay" class="slider-img-after">
+                            <img src="https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&w=800&q=80" class="absolute top-0 left-0 max-w-none h-full object-cover">
+                        </div>
+                        <input type="range" min="0" max="100" value="50" oninput="document.getElementById('slider-overlay').style.width = this.value + '%'" class="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize">
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 space-y-4">
+                    <div class="border-l-4 border-caramelo pl-3 text-xs md:text-sm italic text-cafe">
+                        «Bajo nuestras plantas se hallan las canalizaciones de las Termas Romanas. El agua tibia del Caldarium reconfortaba a los soldados.»
+                    </div>
+
+                    <div class="space-y-3 pt-2 border-t border-caramelo/20">
+                        <h4 class="font-cinzel text-xs font-bold text-caramelo">Desafío:</h4>
+                        <p id="q-text" class="text-xs md:text-sm font-semibold text-cafe"></p>
+                        <div id="q-box" class="space-y-2"></div>
+                        <div id="feedback" class="hidden text-xs font-bold"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="next-step" class="hidden pt-4 border-t border-caramelo/30 flex justify-between items-center">
+                <span class="text-xs font-cinzel text-caramelo font-bold">Cifra 2: III (3)</span>
+                <a href="artesanos.html" class="px-6 py-2 bg-caramelo text-vainilla font-cinzel text-xs uppercase hover:bg-cafe">Ir a Calle Artesanos &rarr;</a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const state = JSON.parse(localStorage.getItem('vareia_game_state')) || { difficulty: 'easy', digits: [] };
+
+        function loadQuestion() {
+            const qBox = document.getElementById('q-box');
+            if(state.difficulty === 'easy') {
+                document.getElementById('q-text').innerText = '¿Cómo llamaban los romanos a la sala de agua caliente con horno subterráneo?';
+                qBox.innerHTML = `
+                    <button onclick="check(true)" class="w-full text-left p-2 text-xs bg-vainilla border border-caramelo">A) Caldarium</button>
+                    <button onclick="check(false)" class="w-full text-left p-2 text-xs bg-vainilla border border-caramelo">B) Frigidarium</button>
+                `;
+            } else {
+                document.getElementById('q-text').innerText = '¿Cómo se llamaba la piscina descubierta en las termas romanas?';
+                qBox.innerHTML = `
+                    <input type="text" id="ans" placeholder="Escribe tu respuesta..." class="w-full p-2 text-xs bg-vainilla border border-caramelo mb-2">
+                    <button onclick="checkHard()" class="px-4 py-2 bg-caramelo text-vainilla text-xs">Verificar</button>
+                `;
+            }
+        }
+
+        function check(ok) {
+            const fb = document.getElementById('feedback');
+            fb.classList.remove('hidden');
+            if(ok) {
+                fb.className = "text-xs font-bold text-green-800";
+                fb.innerText = "¡Correcto! Cifra desbloqueada: 3";
+                state.digits[1] = '3';
+                localStorage.setItem('vareia_game_state', JSON.stringify(state));
+                document.getElementById('next-step').classList.remove('hidden');
+            } else {
+                fb.className = "text-xs font-bold text-red-800";
+                fb.innerText = "Incorrecto. Inténtalo de nuevo.";
+            }
+        }
+
+        function checkHard() {
+            const val = document.getElementById('ans').value.toLowerCase();
+            check(val.includes('natatio'));
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
